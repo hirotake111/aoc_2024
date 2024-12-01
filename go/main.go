@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"aoc_2024/day01"
+)
 
 func main() {
-	fmt.Println("Hello world")
+	day01.Run()
 }
