@@ -4,3 +4,7 @@ tasks:
   run:
     cmds:
       - go run ./{{.CLI_ARGS}}/main.go
+
+  test:
+    cmds:
+      - go test ./{{.CLI_ARGS}}/

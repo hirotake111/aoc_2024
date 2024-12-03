@@ -10,11 +10,14 @@ import (
 )
 
 const (
-	fileName = "./day03/test.txt"
-	// fileName  = "./day03/input.txt"
-	fileName2 = "./day03/test2.txt"
-	// fileName2 = "./day03/input.txt"
+	// fileName = "./day03/test.txt"
+	fileName = "./day03/input.txt"
+	// fileName2 = "./day03/test2.txt"
+	fileName2 = "./day03/input.txt"
 )
+
+var NotTargetError = errors.New("not target")
+var EOF = errors.New("end of file!")
 
 func main() {
 	buf, err := os.ReadFile(fileName)
@@ -46,7 +49,6 @@ type Cursor struct {
 }
 
 func NewCursor(buf []byte) *Cursor {
-	// fmt.Println(string(buf))
 	return &Cursor{
 		buf: buf,
 		idx: 0,
@@ -58,7 +60,6 @@ func (c *Cursor) Peek() (byte, error) {
 		return 0, EOF
 	}
 	b := c.buf[c.idx]
-	// fmt.Printf("peek got %c\n", b)
 	return b, nil
 }
 
@@ -80,24 +81,8 @@ func (c *Cursor) FindM() error {
 }
 
 func (c *Cursor) Parse() (int, error) {
-	// mul(
-	// for _, b := range []byte{'m', 'u', 'l', '('} {
-	// 	t, err := c.Peek()
-	// 	if err != nil {
-	// 		return 0, err
-	// 	}
-	// 	if t != b {
-	// 		// It's not 'mul(' -> continue without returning an error
-	// 		return 0, nil
-	// 	}
-	// 	c.Seek()
-	// }
 	if err := c.parseWord("mul("); err != nil {
-		if errors.Is(err, &NotTargetWordError{}) {
-			// v, err := c.Peek()
-			// fmt.Printf("'%c' is not what I want. %w\n", v, err)
-		} else {
-			// fmt.Println("false")
+		if !errors.Is(err, NotTargetError) {
 			return 0, nil
 		}
 	}
@@ -213,6 +198,10 @@ func (c *Cursor) getTotalPt2() (int, error) {
 					continue
 				}
 				err = c.parseWord("do()")
+				if errors.Is(err, NotTargetError) {
+					// Continue seeking until we find "don't()"
+					continue
+				}
 				break
 			}
 		default:
@@ -234,7 +223,7 @@ func (c *Cursor) parseWord(w string) error {
 			return err
 		}
 		if b != ch {
-			return &NotTargetWordError{a: ch, b: b}
+			return NotTargetError
 		}
 		// Still valid
 		c.Seek()
@@ -242,14 +231,3 @@ func (c *Cursor) parseWord(w string) error {
 	return nil
 
 }
-
-type NotTargetWordError struct {
-	a byte
-	b byte
-}
-
-func (n *NotTargetWordError) Error() string {
-	return fmt.Sprintf("%c and %c is not the same", n.a, n.b)
-}
-
-var EOF = errors.New("end of file!")
