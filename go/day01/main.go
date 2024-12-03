@@ -1,4 +1,4 @@
-package day01
+package main
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ const (
 	fileName = "./day01/sample2.txt"
 )
 
-func Run() {
+func main() {
 	f, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
