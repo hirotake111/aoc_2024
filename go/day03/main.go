@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 )
 
 const (
@@ -120,24 +119,20 @@ func (c *Cursor) Parse() (int, error) {
 var nums = []byte("1234567890")
 
 func (c *Cursor) GetNum() (int, error) {
-	var bs []byte
+	var n int
 	for {
 		b, err := c.Peek()
 		if err != nil {
-			return 0, nil
+			return 0, err
 		}
 		if bytes.Contains(nums, []byte{b}) {
-			bs = append(bs, b)
+			n = n*10 + int(b-'0')
 			c.Seek()
 		} else {
 			break
 		}
 	}
-	a, err := strconv.Atoi(string(bs))
-	if err != nil {
-		return 0, err
-	}
-	return a, nil
+	return n, nil
 }
 
 func (c *Cursor) getTotalPt1() (int, error) {
@@ -150,9 +145,11 @@ func (c *Cursor) getTotalPt1() (int, error) {
 		}
 		n, err := c.Parse()
 		if err != nil {
+			if errors.Is(err, NotTargetError) {
+				continue
+			}
 			break
 		}
-		// fmt.Printf("got result: %d\n", n)
 		total += n
 	}
 
@@ -186,7 +183,6 @@ func (c *Cursor) getTotalPt2() (int, error) {
 			if err = c.parseWord("don't()"); err != nil {
 				continue
 			}
-			fmt.Println("Fond don't()")
 			// Move cursor until it finds do()
 			for {
 				b, err = c.Peek()
