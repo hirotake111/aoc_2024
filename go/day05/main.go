@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	fileName = "./day05/sample.txt"
-	// fileName = "./day05/input.txt"
+	// fileName = "./day05/sample.txt"
+	fileName = "./day05/input.txt"
 )
 
 func main() {
@@ -18,9 +18,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Println(section1)
-	// fmt.Println(section2)
+	if err := calc(section1, section2); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func calc(section1, section2 []string) error {
 	m, err := toMap(section1)
+	if err != nil {
+		return err
+	}
+	// p(m)
 	// fmt.Printf("m: %+v\n", m)
 	var total, corrected int
 	for _, s := range section2 {
@@ -45,12 +54,69 @@ func main() {
 		if flag {
 			total += arr[len(arr)/2]
 		} else {
-
+			updated := correct_ordering(arr, m)
+			corrected += updated[len(updated)/2]
 		}
 	}
 	fmt.Printf("Part1 -> %d\n", total)
-	fmt.Printf("Part2 -> %d\n", total+corrected)
+	fmt.Printf("Part2 -> %d\n", corrected)
+	return nil
+}
 
+type Node struct {
+	val  int
+	next *Node
+}
+
+func (n Node) String() string {
+	return fmt.Sprintf("%d -> %+v", n.val, n.next)
+}
+
+func correct_ordering(arr []int, m map[int]map[int]struct{}) []int {
+	root := &Node{}
+	for _, n := range arr {
+		node := &Node{val: n}
+		// fmt.Printf("new node: %v\n", node)
+		if root.next == nil {
+			// fmt.Printf("connected to root: %+v\n", root)
+			root.next = node
+			continue
+		}
+		prev := root
+		current := root.next
+		for current != nil {
+			before := m[current.val]
+			if _, ok := before[node.val]; ok {
+				// change order
+				prev.next = node
+				node.next = current
+				prev = node
+				break
+			} else {
+				// move on to the next
+				prev = current
+				current = current.next
+			}
+		}
+		if current == nil {
+			prev.next = node
+		}
+	}
+	// fmt.Printf("node: %+v\n", root)
+	updated := make([]int, 0)
+	node := root.next
+	for node != nil {
+		updated = append(updated, node.val)
+		node = node.next
+	}
+	// fmt.Printf("updated: %v\n", updated)
+	return updated
+}
+
+func p(m map[int]map[int]struct{}) {
+	for k, v := range m {
+		fmt.Printf("%d: %v\n", k, v)
+	}
 }
 
 func toIntArr(s string) ([]int, error) {
@@ -83,6 +149,9 @@ func toMap(section []string) (map[int]map[int]struct{}, error) {
 			m[r] = hs
 		} else {
 			hs[l] = struct{}{}
+		}
+		if _, ok := m[l]; !ok {
+			m[l] = make(map[int]struct{}, 0)
 		}
 	}
 	return m, nil
