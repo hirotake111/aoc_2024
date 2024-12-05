@@ -17,7 +17,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Println(grid)
 	var total int
 	for i, row := range grid {
 		for j, c := range row {
