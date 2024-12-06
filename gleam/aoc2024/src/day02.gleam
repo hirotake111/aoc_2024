@@ -16,8 +16,27 @@ const example = "7 6 4 2 1
 pub fn start() {
   let assert Ok(raw_data) = simplifile.read("./data/day02.txt")
   let assert 2 = part1(example)
+  let assert 4 = part2(example)
   io.println("Part1 -> " <> part1(raw_data) |> int.to_string)
+  io.println("Part2 -> " <> part2(raw_data) |> int.to_string)
   Nil
+}
+
+fn part2(raw_data: String) -> Int {
+  let variations =
+    raw_data
+    |> to_report
+    |> list.map(to_report_variations)
+  list.filter(variations, fn(variations) { list.any(variations, validate) })
+  |> list.length
+}
+
+fn to_report_variations(line: List(Int)) -> List(List(Int)) {
+  line
+  |> list.index_map(fn(_, i) {
+    let #(left, right) = list.split(line, i)
+    list.append(left, list.drop(right, 1))
+  })
 }
 
 fn part1(raw_data: String) -> Int {
