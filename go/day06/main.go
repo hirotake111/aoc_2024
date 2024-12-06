@@ -39,6 +39,7 @@ func part2(s string) int {
 	grid := stringToGrid(s)
 	r, c := find_guard(grid)
 	paths := collectPath(grid, r, c)[1:]
+	// 1: up, 2: right, 4: down, 8: left, 16: obstacle
 	format(grid)
 	var options int
 	for _, p := range paths {
@@ -72,7 +73,6 @@ func canMakeLoop(src [][]byte, r, c, a, b int) bool {
 	grid[a][b] = 16
 	m, n := len(grid), len(grid[0])
 	for {
-		// 1: up, 2: right, 4: down, 8: left
 		for _, delta := range [4][3]int{{-1, 0, 1}, {0, 1, 2}, {1, 0, 4}, {0, -1, 8}} {
 			for {
 				nr, nc := r+delta[0], c+delta[1]
