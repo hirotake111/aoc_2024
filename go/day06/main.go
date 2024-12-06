@@ -33,20 +33,26 @@ func main() {
 
 func part1(s string) int {
 	grid := stringToGrid(s)
+	paths := collectPath(grid)
+	return len(paths)
+}
+
+func collectPath(src [][]byte) [][2]int {
+	grid := make([][]byte, len(src))
+	copy(grid, src)
 	// p(grid)
-	// Identify initial guard position
 	m, n := len(grid), len(grid[0])
 	r, c := find_guard(grid)
 	grid[r][c] = 'X'
 	// fmt.Printf("x: %d, y: %d\n", x, y)
-	steps := 1
+	var paths [][2]int = [][2]int{{r, c}}
 	for r >= 0 && r < m && c >= 0 && c < n {
 		for _, delta := range [4][2]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}} {
 			for {
 				nr, nc := r+delta[0], c+delta[1]
 				if nr < 0 || nr >= m || nc < 0 || nc >= n {
 					// Out of the grid
-					return steps
+					return paths
 				}
 				if grid[nr][nc] == '#' {
 					// Change the direction
@@ -55,14 +61,12 @@ func part1(s string) int {
 				r, c = nr, nc
 				if grid[r][c] != 'X' {
 					grid[r][c] = 'X'
-					steps++
+					paths = append(paths, [2]int{r, c})
 				}
-				// fmt.Println(steps)
-				// p(grid)
 			}
 		}
 	}
-	return -1
+	panic("unreachable")
 }
 
 func stringToGrid(s string) [][]byte {
