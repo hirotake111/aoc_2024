@@ -20,15 +20,38 @@ type Equation {
 
 pub fn start() {
   let assert 3749 = part1(example)
+  let assert 11_387 = part2(example)
   let assert Ok(input) = simplifile.read("./data/day07.txt")
   io.println("Part1 -> " <> part1(input) |> int.to_string)
+  io.println("Part2 -> " <> part2(input) |> int.to_string)
   Nil
+}
+
+fn inner_concat(a: Int, b: Int, n: Int) -> Int {
+  case n <= b {
+    True -> inner_concat(a, b, n * 10)
+    False -> a * n + b
+  }
+}
+
+fn concat(a: Int, b: Int) -> Int {
+  inner_concat(a, b, 10)
+}
+
+fn part2(input: String) -> Int {
+  let lines = string.split(string.trim(input), "\n")
+  let equations = list.map(lines, parse_equation)
+  let ops: List(fn(Int, Int) -> Int) = [
+    fn(a: Int, b: Int) -> Int { a + b },
+    fn(a: Int, b: Int) -> Int { a * b },
+    concat,
+  ]
+  list.fold(equations, 0, fn(sum, eq) { sum + get_calibration_result(eq, ops) })
 }
 
 fn part1(input: String) -> Int {
   let lines = string.split(string.trim(input), "\n")
   let equations = list.map(lines, parse_equation)
-  // |> io.debug
   let ops: List(fn(Int, Int) -> Int) = [
     fn(a: Int, b: Int) -> Int { a + b },
     fn(a: Int, b: Int) -> Int { a * b },
