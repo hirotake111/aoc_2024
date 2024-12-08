@@ -17,11 +17,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	nodes := part1(grid)
-	for _, n := range nodes {
-		grid[n[0]][n[1]] = '#'
-	}
-	fmt.Printf("Part1 -> %d\n", len(nodes))
+	fmt.Printf("Part1 -> %d\n", len(part1(grid)))
+	fmt.Printf("Part2 -> %d\n", len(part2(grid)))
 }
 
 func part1(grid [][]byte) []Node {
@@ -43,7 +40,7 @@ func part2(grid [][]byte) []Node {
 	antennaGroup := getAntennaGroup(grid)
 	posSet := make(map[Node]struct{})
 	for _, an := range antennaGroup {
-		for _, node := range getAntiNodes(an, len(grid), len(grid[0]), getPosition) {
+		for _, node := range getAntiNodes(an, len(grid), len(grid[0]), getPosition2) {
 			posSet[node] = struct{}{}
 		}
 	}
@@ -63,9 +60,7 @@ func getAntiNodes(
 	for i := 0; i < len(antennas); i++ {
 		for j := i + 1; j < len(antennas); j++ {
 			for _, node := range generator(antennas[i], antennas[j], m, n) {
-				if node[0] >= 0 && node[0] < m && node[1] >= 0 && node[1] < n {
-					hs[node] = struct{}{}
-				}
+				hs[node] = struct{}{}
 			}
 		}
 	}
@@ -94,15 +89,28 @@ func getPosition(a, b Node, m, n int) []Node {
 	return nodes
 }
 
-func getPosition2(a, b Node) []Node {
+func getPosition2(a, b Node, m, n int) []Node {
 	ax, ay, bx, by := a[0], a[1], b[0], b[1]
 	diffx := ax - bx
-	ax += diffx
-	bx -= diffx
 	diffy := ay - by
-	ay += diffy
-	by -= diffy
-	return []Node{{ax, ay}, {bx, by}}
+	nodes := make([]Node, 0)
+	for {
+		nodes = append(nodes, Node{ax, ay})
+		ax += diffx
+		ay += diffy
+		if ax < 0 || ax >= m || ay < 0 || ay >= n {
+			break
+		}
+	}
+	for {
+		nodes = append(nodes, Node{bx, by})
+		bx -= diffx
+		by -= diffy
+		if bx < 0 || bx >= m || by < 0 || by >= n {
+			break
+		}
+	}
+	return nodes
 }
 
 func getAntennaGroup(grid [][]byte) map[byte][]Node {

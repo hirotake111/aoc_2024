@@ -23,7 +23,6 @@ const example = `
 func TestMain(t *testing.T) {
 	grid, err := getGrid(example)
 	assert.Nil(t, err)
-
 	assert.Equal(t, 14, len(part1(grid)))
-	// assert.Equal(t, 34, len(part2(grid)))
+	assert.Equal(t, 34, len(part2(grid)))
 }
