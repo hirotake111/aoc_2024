@@ -21,7 +21,6 @@ func main() {
 	for _, n := range nodes {
 		grid[n[0]][n[1]] = '#'
 	}
-	// p(grid)
 	fmt.Printf("Part1 -> %d\n", len(nodes))
 }
 
@@ -29,7 +28,7 @@ func part1(grid [][]byte) []Node {
 	antennaGroup := getAntennaGroup(grid)
 	posSet := make(map[Node]struct{})
 	for _, antenna := range antennaGroup {
-		for _, node := range getAntiNodes(antenna, len(grid), len(grid[0])) {
+		for _, node := range getAntiNodes(antenna, len(grid), len(grid[0]), getPosition) {
 			posSet[node] = struct{}{}
 		}
 	}
@@ -40,17 +39,14 @@ func part1(grid [][]byte) []Node {
 	return uniqueNodes
 }
 
-func getAntiNodes(antennas []Node, m, n int) []Node {
+func getAntiNodes(antennas []Node, m, n int, generator func(a, b Node) []Node) []Node {
 	hs := make(map[Node]struct{}, 0)
 	for i := 0; i < len(antennas); i++ {
 		for j := i + 1; j < len(antennas); j++ {
-			a, b := getPosition(antennas[i], antennas[j])
-			if a[0] >= 0 && a[0] < m && a[1] >= 0 && a[1] < n {
-				hs[a] = struct{}{}
-
-			}
-			if b[0] >= 0 && b[0] < m && b[1] >= 0 && b[1] < n {
-				hs[b] = struct{}{}
+			for _, node := range generator(antennas[i], antennas[j]) {
+				if node[0] >= 0 && node[0] < m && node[1] >= 0 && node[1] < n {
+					hs[node] = struct{}{}
+				}
 			}
 		}
 	}
@@ -61,7 +57,7 @@ func getAntiNodes(antennas []Node, m, n int) []Node {
 	return arr
 }
 
-func getPosition(a, b Node) (Node, Node) {
+func getPosition(a, b Node) []Node {
 	ax, ay, bx, by := a[0], a[1], b[0], b[1]
 	if ax > bx {
 		diff := ax - bx
@@ -81,7 +77,7 @@ func getPosition(a, b Node) (Node, Node) {
 		ay -= diff
 		by += diff
 	}
-	return Node{ax, ay}, Node{bx, by}
+	return []Node{Node{ax, ay}, Node{bx, by}}
 }
 
 func getAntennaGroup(grid [][]byte) map[byte][]Node {
