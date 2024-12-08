@@ -27,8 +27,8 @@ func main() {
 func part1(grid [][]byte) []Node {
 	antennaGroup := getAntennaGroup(grid)
 	posSet := make(map[Node]struct{})
-	for _, antenna := range antennaGroup {
-		for _, node := range getAntiNodes(antenna, len(grid), len(grid[0]), getPosition) {
+	for _, an := range antennaGroup {
+		for _, node := range getAntiNodes(an, len(grid), len(grid[0]), getPosition) {
 			posSet[node] = struct{}{}
 		}
 	}
@@ -39,11 +39,30 @@ func part1(grid [][]byte) []Node {
 	return uniqueNodes
 }
 
-func getAntiNodes(antennas []Node, m, n int, generator func(a, b Node) []Node) []Node {
+func part2(grid [][]byte) []Node {
+	antennaGroup := getAntennaGroup(grid)
+	posSet := make(map[Node]struct{})
+	for _, an := range antennaGroup {
+		for _, node := range getAntiNodes(an, len(grid), len(grid[0]), getPosition) {
+			posSet[node] = struct{}{}
+		}
+	}
+	uniqueNodes := make([]Node, 0)
+	for co := range posSet {
+		uniqueNodes = append(uniqueNodes, co)
+	}
+	return uniqueNodes
+}
+
+func getAntiNodes(
+	antennas []Node,
+	m, n int,
+	generator func(a, b Node, m, n int) []Node,
+) []Node {
 	hs := make(map[Node]struct{}, 0)
 	for i := 0; i < len(antennas); i++ {
 		for j := i + 1; j < len(antennas); j++ {
-			for _, node := range generator(antennas[i], antennas[j]) {
+			for _, node := range generator(antennas[i], antennas[j], m, n) {
 				if node[0] >= 0 && node[0] < m && node[1] >= 0 && node[1] < n {
 					hs[node] = struct{}{}
 				}
@@ -57,27 +76,33 @@ func getAntiNodes(antennas []Node, m, n int, generator func(a, b Node) []Node) [
 	return arr
 }
 
-func getPosition(a, b Node) []Node {
+func getPosition(a, b Node, m, n int) []Node {
 	ax, ay, bx, by := a[0], a[1], b[0], b[1]
-	if ax > bx {
-		diff := ax - bx
-		ax += diff
-		bx -= diff
-	} else {
-		diff := bx - ax
-		ax -= diff
-		bx += diff
+	diffx := ax - bx
+	diffy := ay - by
+	ax += diffx
+	ay += diffy
+	bx -= diffx
+	by -= diffy
+	nodes := make([]Node, 0)
+	if ax >= 0 && ax < m && ay >= 0 && ay < n {
+		nodes = append(nodes, Node{ax, ay})
 	}
-	if ay > by {
-		diff := ay - by
-		ay += diff
-		by -= diff
-	} else {
-		diff := by - ay
-		ay -= diff
-		by += diff
+	if bx >= 0 && bx < m && by >= 0 && by < n {
+		nodes = append(nodes, Node{bx, by})
 	}
-	return []Node{Node{ax, ay}, Node{bx, by}}
+	return nodes
+}
+
+func getPosition2(a, b Node) []Node {
+	ax, ay, bx, by := a[0], a[1], b[0], b[1]
+	diffx := ax - bx
+	ax += diffx
+	bx -= diffx
+	diffy := ay - by
+	ay += diffy
+	by -= diffy
+	return []Node{{ax, ay}, {bx, by}}
 }
 
 func getAntennaGroup(grid [][]byte) map[byte][]Node {

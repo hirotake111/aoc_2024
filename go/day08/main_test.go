@@ -20,31 +20,10 @@ const example = `
 ............
 ............`
 
-const want = `
-......#....#
-...#....0...
-....#0....#.
-..#....0....
-....0....#..
-.#....A.....
-...#........
-#......#....
-........A...
-.........A..
-..........#.
-..........#.
-`
-
 func TestMain(t *testing.T) {
 	grid, err := getGrid(example)
 	assert.Nil(t, err)
-	nodes := part1(grid)
-	for _, n := range nodes {
-		grid[n[0]][n[1]] = '#'
-	}
-	// wantGrid, err := getGrid(want)
-	assert.Nil(t, err)
-	assert.Equal(t, 14, len(nodes))
-	// assert.Equal(t, grid, wantGrid)
 
+	assert.Equal(t, 14, len(part1(grid)))
+	// assert.Equal(t, 34, len(part2(grid)))
 }
