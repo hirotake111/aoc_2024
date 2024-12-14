@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ func main() {
 	}
 	garden := getGarden(string(input))
 	fmt.Printf("Part1 -> %d\n", part1(garden))
+	fmt.Printf("Part2 -> %d\n", part2(garden))
 }
 
 func getGarden(input string) [][]byte {
@@ -21,6 +23,112 @@ func getGarden(input string) [][]byte {
 		garden = append(garden, []byte(s))
 	}
 	return garden
+}
+
+func part2(garden [][]byte) int {
+	m, n := len(garden), len(garden[0])
+	// Hash set to track visited cell
+	seen := make([][]bool, len(garden))
+	for i := range garden {
+		seen[i] = make([]bool, len(garden[0]))
+	}
+
+	var prices int
+	for i, row := range garden {
+		for j := range row {
+			if seen[i][j] {
+				continue
+			}
+			seen[i][j] = true
+			fmt.Printf("%c: i: %d, j: %d\n", garden[i][j], i, j)
+			plants := 1
+			q := Queue{{i, j}}
+			sides := make(map[[2]int][][2]int, 0)
+
+			for !q.Empty() {
+				v := q.Pop()
+				// 1: Right, 2: Down, 3: left, 4: Up
+				for _, d := range [4][2]int{{0, 1}, {1, 0}, {0, -1}, {-1, 0}} {
+					r, c := v[0]+d[0], v[1]+d[1]
+					if r < 0 || r >= m || c < 0 || c >= n || garden[v[0]][v[1]] != garden[r][c] {
+						// fmt.Printf("r: %d c: %d, direction: %v, \n", r, c, d)
+						if d[1] == 0 { // Up or down
+							sides[d] = append(sides[d], [2]int{r, c})
+							// fmt.Printf("sideMap: %+v\n", sides)
+						} else {
+							sides[d] = append(sides[d], [2]int{r, c})
+							// fmt.Printf("sideMap: %+v\n", sides)
+						}
+					} else {
+						if seen[r][c] {
+							continue
+						}
+						seen[r][c] = true
+						// Same kind of plant
+						q.Push([2]int{r, c})
+						plants++
+						// fmt.Printf("r: %d, c: %d, Same plant: plants: %d\n", r, c, plants)
+					}
+				}
+			}
+			s := calcSides(sides)
+			// fmt.Printf("Final value of the sides: %v\n", sides)
+			// fmt.Printf("%c: plants: %d, sides: %d -> %d\n", garden[i][j], plants, s, plants*s)
+			prices += plants * s
+		}
+	}
+	return prices
+}
+
+func calcSides(sides map[[2]int][][2]int) int {
+	total := 4
+	for d, arr := range sides {
+		switch d {
+		case [2]int{-1, 0}, [2]int{1, 0}: // up or down
+			sort.Slice(arr, func(i, j int) bool {
+				if arr[i][0] == arr[j][0] {
+					return arr[i][1] < arr[j][1]
+				}
+				return arr[i][0] < arr[j][0]
+			})
+			for i := 1; i < len(arr); i++ {
+				if arr[i-1][0] != arr[i][0] || arr[i-1][1]+1 != arr[i][1] {
+					total++
+				}
+			}
+		case [2]int{0, -1}, [2]int{0, 1}: // left or right
+			sort.Slice(arr, func(i, j int) bool {
+				if arr[i][1] == arr[j][1] {
+					return arr[i][0] < arr[j][0]
+				}
+				return arr[i][1] < arr[j][1]
+			})
+			for i := 1; i < len(arr); i++ {
+				if arr[i-1][1] != arr[i][1] || arr[i-1][0]+1 != arr[i][0] {
+					total++
+				}
+			}
+		default:
+			panic(d)
+		}
+	}
+	return total
+}
+
+type Queue [][2]int
+
+func (q *Queue) Push(v [2]int) {
+	*q = append(*q, v)
+}
+
+func (q *Queue) Pop() [2]int {
+	v := (*q)[0]
+	*q = (*q)[1:]
+	return v
+}
+
+func (q Queue) Empty() bool {
+	return len(q) == 0
 }
 
 func part1(garden [][]byte) int {
