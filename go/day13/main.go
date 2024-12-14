@@ -19,6 +19,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Part1 -> %d\n", part1(inputs))
+	fmt.Printf("Part2 -> %d\n", part2(inputs))
 }
 
 type Input struct {
@@ -73,13 +74,33 @@ func getInputs(s string) ([]Input, error) {
 	return inputs, nil
 }
 
+func part2(inputs []Input) int {
+	var tokens int
+	for _, input := range inputs {
+		input.Prize.X += 10000000000000
+		input.Prize.Y += 10000000000000
+		s := float64(input.Prize.X*input.B.Y-input.Prize.Y*input.B.X) / float64(input.A.X*input.B.Y-input.A.Y*input.B.X)
+		t := (float64(input.Prize.X) - float64(input.A.X)*s) / float64(input.B.X)
+		if float64(int(s)) != s || float64(int(t)) != t {
+			continue
+		}
+		// fmt.Printf("s: %f, t: %f\n", s, t)
+		tokens += int(s)*3 + int(t)
+	}
+	return tokens
+}
+
 func part1(inputs []Input) int {
 	var tokens int
 	for _, input := range inputs {
 		// fmt.Printf("input: %+v\n", input)
-		v := getMinTokens(input)
-		// fmt.Printf("Game %d: Spend %d tokens\n", i, v)
-		tokens += v
+		s := float64(input.Prize.X*input.B.Y-input.Prize.Y*input.B.X) / float64(input.A.X*input.B.Y-input.A.Y*input.B.X)
+		t := (float64(input.Prize.X) - float64(input.A.X)*s) / float64(input.B.X)
+		if float64(int(s)) != s || float64(int(t)) != t || s > 100 || t > 100 {
+			continue
+		}
+		// fmt.Printf("s: %f, t: %f\n", s, t)
+		tokens += int(s)*3 + int(t)
 	}
 	return tokens
 }
